@@ -38,6 +38,7 @@ RUN set -x \
         erlang-src erlang-dev \
     ' \
     && requiredAptPackages=' \
+        wget \
         locales \
         ldnsutils \
         python2.7 \
@@ -92,14 +93,6 @@ RUN set -x \
 ENV GOSU_VERSION 1.10
 RUN set -ex; \
     \
-    fetchDeps=' \
-        ca-certificates \
-        wget \
-    '; \
-    apt-get update; \
-    apt-get install -y --no-install-recommends $fetchDeps; \
-    rm -rf /var/lib/apt/lists/*; \
-    \
     dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
     wget -O /usr/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch"; \
     wget -O /usr/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc"; \
@@ -113,6 +106,9 @@ RUN set -ex; \
     chmod +sx /usr/bin/gosu; \
 # verify that the binary works
     gosu nobody true;
+
+RUN wget -P /usr/local/share/ca-certificates/cacert.org http://www.cacert.org/certs/root.crt http://www.cacert.org/certs/class3.crt; \
+    update-ca-certificates
 
 # Create logging directories
 RUN mkdir -p /var/log/ejabberd
